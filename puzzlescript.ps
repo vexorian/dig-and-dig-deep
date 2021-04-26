@@ -1,0 +1,819 @@
+title Dig Deeper and Deeper 0.34
+
+(This uses pancelor's puzzle script fork : https://pancelor.com/PuzzleScript/editor.html )
+( After exporting, set SOUND_VOL variable to 0.05  in the generated HTML)
+
+text_color #AF9C6B
+
+author vexorian
+homepage vexorian.com
+
+
+run_rules_on_level_start
+enable_level_select
+
+(verbose_logging)
+
+(
+zlib License
+
+Copyright (c) 2021, Victor Hugo Soliz Kuncar
+
+This software is provided 'as-is', without any express or implied
+warranty. In no event will the authors be held liable for any damages
+arising from the use of this software.
+
+Permission is granted to anyone to use this software for any purpose,
+including commercial applications, and to alter it and redistribute it
+freely, subject to the following restrictions:
+
+1. The origin of this software must not be misrepresented; you must not
+   claim that you wrote the original software. If you use this software
+   in a product, an acknowledgment in the product documentation would be
+   appreciated but is not required.
+2. Altered source versions must be plainly marked as such, and must not be
+   misrepresented as being the original software.
+3. This notice may not be removed or altered from any source distribution.
+
+)
+
+
+(Made in under 2 days for the Ludum Dare 48-th, my first LD, had fun
+I had the idea of digging and picking up rocks quite quickly. Didn't really want
+to do it, but I couldn't think of something else. After seeing the blog posts, it's
+become clear that this is a very common idea people get after fidning out
+the theme is "Deeper and Deeper". So my strategy is to stand out by coming up with
+interesting ways in which the mechanics can interact.
+
+I personally wasn't happy with the design of the game until I thought of the teleportation
+gems, I think the teleportation gems really allow for interesting level designs. Kind of
+feel like I should have thought of them earlier so that I could have levels with those
+gems sooner. So only the last 3 levels have the gems. But ces la vie. This is the sort
+of thing I'll fix post-jam. Some extra levels and condensing the earliest 7 levels into 4 or
+5 to introduce the gems more quickly. 
+)
+
+
+========
+OBJECTS
+========
+
+Background
+Black
+
+Wall
+#864E52
+
+WallSprite1
+#864E52 #864E52 #864E5C #864E66
+02002
+02112
+13121
+13203
+10013
+
+WallSprite2
+#864E52 #864E52 #864E5C #864E66
+20213
+01233
+23120
+02301
+00202
+
+WallSprite3
+#864E52 #864E52 #864E5C #864E66
+32130
+31033
+23113
+22312
+00202
+
+WallU
+#AA555A black
+00000
+.....
+.....
+.....
+.....
+
+WallD
+#61393B black
+.....
+.....
+.....
+.....
+00000
+
+WallR
+#61393B black
+....0
+....0
+....0
+....0
+....0
+
+WallL
+#AA555A black
+0....
+0....
+0....
+0....
+0....
+
+
+Spike
+#AB363E #C63E48 #7E282E
+.1.1.
+.1212
+.1212
+10000
+.222.
+
+PlayerFreeN
+White
+.000.
+.000.
+..0..
+..0..
+..0..
+
+PlayerFreeR
+White
+.000.
+.000.
+.00..
+..0..
+..0..
+
+
+PlayerFreeL
+White
+.000.
+.000.
+..00.
+..0..
+..0..
+
+
+
+PlayerHoldingN
+White
+.0.0.
+.000.
+.000.
+..0..
+..0..
+
+
+PlayerHoldingR
+White
+.0.0.
+..000
+..000
+..00.
+...0.
+
+
+
+PlayerHoldingL
+White
+.0.0.
+000..
+000..
+.00..
+.0...
+
+PlayerDugN
+White
+.0.0.
+.000.
+.000.
+.00..
+..0..
+
+
+PlayerDugR
+White
+.0.0.
+..000
+..000
+...00
+...0.
+
+
+
+PlayerDugL
+White
+.0.0.
+000..
+000..
+00...
+.0...
+
+
+
+
+EarthUnSet
+#AF9A66
+.....
+.000.
+...0.
+.000.
+.0...
+
+
+Earth__
+#AF9A66 #AF9A66 #AF9960 #AF9C6B
+.2030
+2210.
+.1333
+3303.
+23331
+
+
+Earth_R
+#AF9A66 #AF9A66 #AF9960 #AF9C6B
+.2030
+22101
+.1333
+33031
+23331
+
+
+EarthL_
+#AF9A66 #AF9A66 #AF9960 #AF9C6B
+02030
+2210.
+01333
+3303.
+23331
+
+EarthLR
+#AF9A66 #AF9A66 #AF9960 #AF9C6B
+02030
+22101
+01333
+33031
+23331
+
+
+GoneEarth1
+#AF9A66 #AF9A66 #AF9960 #AF9C6B
+.2.3.
+..10.
+..3.3
+3....
+.3.3.
+
+GoneEarth2
+#AF9A66 #AF9A66 #AF9960 #AF9C6B
+.2...
+.....
+..3.3
+.....
+...3.
+
+
+Gem1
+Yellow White
+..0..
+.010.
+01000
+.010.
+..0..
+
+Gem2
+White Yellow
+..0..
+.010.
+01000
+.010.
+..0..
+
+
+
+StoneStatic
+#AFA58C #AFA58C #AAA088 #BBB196 #CDC2A4 #DACEAE #87806C
+.544.
+54406
+44006
+42066
+.666.
+
+StonePicked
+#AFA58C #AFA58C #AAA088 #BBB196 #CDC2A4 #DACEAE #87806C
+.544.
+54406
+44006
+42066
+.666.
+
+ThrownStoneR
+#AFA58C #AFA58C #AAA088 #BBB196 #CDC2A4 #DACEAE #87806C
+.544.
+54406
+44006
+42066
+.666.
+
+ThrownStoneL
+#AFA58C #AFA58C #AAA088 #BBB196 #CDC2A4 #DACEAE #87806C
+.544.
+54406
+44006
+42066
+.666.
+
+StoneR
+#AFA58C #AFA58C #AAA088 #BBB196 #CDC2A4 #DACEAE #87806C
+.544.
+54406
+44006
+42066
+.666.
+
+StoneL
+#AFA58C #AFA58C #AAA088 #BBB196 #CDC2A4 #DACEAE #87806C
+.544.
+54406
+44006
+42066
+.666.
+
+StoneLockedR
+#AFA58C #AFA58C #AAA088 #BBB196 #CDC2A4 #DACEAE #87806C
+.544.
+54406
+44006
+42066
+.666.
+
+StoneLockedL
+#AFA58C #AFA58C #AAA088 #BBB196 #CDC2A4 #DACEAE #87806C
+.544.
+54406
+44006
+42066
+.666.
+
+
+Error
+Red
+.0.0.
+0.0.0
+.0.0.
+0.0.0
+.0.0.
+
+BottomRow
+transparent
+
+Fell
+transparent
+
+NotFalling
+transparent
+
+Manhattan1
+blue
+
+Manhattan2
+orange
+
+FoundGem
+transparent
+
+NotFirst
+transparent
+
+NoRock
+transparent
+
+=======
+LEGEND
+=======
+
+. = Background
+# = Background and Wall
+W = Background and Spike
+P = Background and PlayerFreeN
+% = Background and EarthUnSet
+o = Background and StoneStatic
+$ = Background and Gem1
+
+EarthL = EarthL_ or EarthLR
+EarthR = Earth_R or EarthLR
+Earth = EarthUnSet or Earth__ or EarthL_ or Earth_R or EarthLR
+
+StoneToMoveR = StoneR or ThrownStoneR
+StoneToMoveL = StoneL or ThrownStoneL
+StoneToMove = StoneToMoveR or StoneToMoveL
+
+StoneThrown = ThrownStoneR or ThrownStoneL
+
+Stone = StoneStatic or StonePicked or StoneThrown or StoneToMoveR or StoneToMoveL or StoneLockedR or StoneLockedL
+
+PlayerFree = PlayerFreeN or PlayerFreeR or PlayerFreeL
+PlayerHolding = PlayerHoldingN or PlayerHoldingL or PlayerHoldingR
+PlayerDug = PlayerDugN or PlayerDugL or PlayerDugR
+
+Player = PlayerFree or PlayerHolding or PlayerDug
+
+MightFall = Player or Stone or Spike or Gem1
+Gem = Gem1 or Gem2
+Blocker = Player or Earth or Stone or Wall or Spike or Gem
+
+PlayerN = PlayerFreeN or PlayerHoldingN or PlayerDugN
+PlayerL = PlayerFreeL or PlayerHoldingL or PlayerDugL
+PlayerR = PlayerFreeR or PlayerHoldingR or PlayerDugR
+
+EarthOrWall = Earth or Wall
+
+Held = StonePicked or Gem2
+
+WallSprite = WallSprite1 or WallSprite2 or WallSprite3
+GoneEarth = GoneEarth1 or GoneEarth2
+
+=======
+SOUNDS
+=======
+
+SFX0 555502   (teleport)
+sfx1 21548505 (fall)
+sfx2 15072902 (dig)
+sfx3 24052504 (rock hits something)
+sfx4 61663704 (ouch)
+
+================
+COLLISIONLAYERS
+================
+
+NotFalling
+Fell
+BottomRow
+Background
+GoneEarth
+Player, Stone, Wall, Earth, Spike, Gem1, Gem2
+WallSprite
+WallL
+WallR
+WallU
+WallD
+
+Error
+Manhattan1, Manhattan2
+FoundGem
+NotFirst
+NoRock
+
+======
+RULES
+======
+
+(decorative stuff)
+[ Wall no WallSprite ] -> [ Wall random WallSprite ]
+left  [ Wall | no Wall ] -> [ Wall WallL | ]
+right [ Wall | no Wall ] -> [ Wall WallR | ]
+up    [ Wall | no Wall ] -> [ Wall WallU | ]
+down  [ Wall | no Wall ] -> [ Wall WallD | ]
+
+
+[ PlayerDugN ] -> [ PlayerFreeN ]
+[ PlayerDugL ] -> [ PlayerFreeL ]
+[ PlayerDugR ] -> [ PlayerFreeR ]
+
+
+down [ Player | Spike ] -> [ | Spike ] sfx4
+
+(animation)
+[ GoneEarth2 ] -> [  ]
+[ GoneEarth1 ] -> [ GoneEarth2 ]
+
+
+(Teleportation)
+
+down [ Gem2 | Player ] -> [ Manhattan1 Gem2 | Player ]
+
+startloop
+   [Gem2][ Manhattan1 | no Manhattan2 no Manhattan1 ] -> [Gem2][ Manhattan1 | Manhattan2 ]
+   [Gem2][ Manhattan1 Gem1 ] -> [][ Manhattan1 Gem1 FoundGem ]
+   [Gem2][ Manhattan2 | no Manhattan1 no Manhattan2 ] -> [Gem2][ Manhattan2 | Manhattan1 ]
+   [Gem2][ Manhattan2 Gem1 ] -> [][ Manhattan2 Gem1 FoundGem ]
+endloop
+
+(startloop
+   [Manhattan1][ Wall ] -> [Manhattan1][ StoneStatic ]
+   [Manhattan1][ StoneStatic ] -> [Manhattan1][ Wall ]
+endloop)
+
+[ Manhattan1 ] -> []
+[ Manhattan2 ] -> []
+[ Gem2 ] -> []
+[ Player ][ FoundGem Gem1 ] -> [ ][ Player ] sfx0
+
+(Mark bottom row)
+[] -> [ BottomRow]
+down [ BottomRow | ] -> [ | ]
+
+(Set all earth as sticky)
+right [ EarthOrWall | EarthUnSet | EarthOrWall ] -> [ EarthOrWall | EarthLR | EarthOrWall ]
+right [ EarthUnSet | EarthOrWall ] -> [ Earth_R | EarthOrWall ]
+left  [ EarthUnSet | EarthOrWall ] -> [ EarthL_ | EarthOrWall ]
+[ EarthUnset ] -> [ Earth__ ]
+
+
+(No going up or down for you!)
+vertical [ > Player ] -> [ Player ]
+
+([ > Player ] -> again)
+([ action Player ] -> again)
+
+[ left  PlayerFree ] -> [ left  PlayerFreeL ]
+[ right PlayerFree ] -> [ right PlayerFreeR ]
+
+[ left  PlayerHolding no PlayerHoldingL ] -> [ PlayerHoldingL ]
+[ left  PlayerHolding ] -> [ left  PlayerHoldingL ]
+
+[ right PlayerHolding no PlayerHoldingR ] -> [ PlayerHoldingR ]
+[ right PlayerHolding ] -> [ right PlayerHoldingR ]
+
+
+
+
+( roll )
+down [ StoneToMove | Blocker ] -> [ action StoneToMove | Blocker ]
+
+right [ action StoneToMoveR | no Blocker ] -> [  | StoneLockedR ] again
+left  [ action StoneToMoveL | no Blocker ] -> [  | StoneLockedL ] again
+
+[ action Stone ] -> [ Stone ]
+
+right [ StoneToMoveR | Earth ] -> [ StoneStatic | GoneEarth1 action Background ]  sfx3
+left  [ StoneToMoveL | Earth ] -> [ StoneStatic | GoneEarth1 action Background ]  sfx3
+
+
+right [ StoneToMoveR | Blocker ] -> [ StoneStatic | Blocker ]  sfx3
+left  [ StoneToMoveL | Blocker ] -> [ StoneStatic | Blocker ]  sfx3
+
+(dig)
+down [ action PlayerN no PlayerHolding | Earth Background ] -> [ GoneEarth1  | PlayerDugN Fell action Background ] sfx2
+( dig: unstick the sticky earth )
+down [ action PlayerR no PlayerHolding | Earth Background ] -> [ GoneEarth1 | PlayerDugR Fell action Background ] sfx2
+( dig: unstick the sticky earth )
+down [ action PlayerL no PlayerHolding | Earth Background ] -> [ GoneEarth1 | PlayerDugL Fell action Background ] sfx2
+( dig: unstick the sticky earth )
+
+
+right [ EarthLR | action Background ] -> [ EarthL_ | action Background ]
+right [ Earth_R | action Background ] -> [ Earth__ | action Background ]
+left  [ EarthLR | action Background ] -> [ Earth_R | action Background ]
+left  [ EarthL_ | action Background ] -> [ Earth__ | action Background ]
+
+
+[ action Background ] -> [ Background ]
+
+
+
+
+(gravity)
+
+( NotFalling means there's ground holding it)
+[ NotFalling] -> [  ]
+[ Wall ] -> [ Wall NotFalling ]
+
+startloop
+   
+   down [ Blocker no NotFalling | NotFalling ] -> [ Blocker NotFalling | NotFalling ]
+   right [ EarthR no NotFalling | EarthOrWall NotFalling ] -> [ EarthR NotFalling | EarthOrWall NotFalling ]
+   right [ EarthOrWall NotFalling | EarthL no NotFalling ] -> [ EarthOrWall NotFalling | EarthL NotFalling ]
+
+   vertical [ NotFalling Earth | no NotFalling Earth ] -> [ NotFalling Earth | NotFalling Earth ]
+endloop
+
+startloop
+[ no Fell MightFall no Player BottomRow ] -> [ Fell BottomRow ]
+[ no Fell no NotFalling Earth BottomRow ] -> [ Fell BottomRow ]
+
+down [ Player no Fell | no Blocker ] -> [ | Player Fell ] sfx1
+down [ StonePicked no Fell | no Blocker ] -> [ | StonePicked Fell ]
+
+down [ Stone no StonePicked no StoneThrown no Fell | Player ] -> [ | Stone Fell ] sfx4
+
+down [ Stone no Fell | no Blocker ] -> [ | Stone Fell ]
+
+down [ Gem1 no Fell | no Blocker ] -> [ | Gem1 Fell ]
+
+down [ no NotFalling earth no Fell | no Blocker ] -> [ | earth Fell ]
+
+down [ Spike  no Fell | no Blocker ] -> [ | Spike ]
+
+endloop
+
+down [ StoneStatic Fell NoRock NotFirst | Blocker No Player ] -> sfx3
+
+
+
+[ Fell ] -> [] again
+[ GoneEarth ] -> again
+
+(unlock)
+[ StoneLockedR ] -> [ StoneR ]
+[ StoneLockedL ] -> [ StoneL ]
+
+
+
+(pick up)
+down [ no Blocker | action PlayerR no PlayerHolding | StoneStatic ] -> [ StonePicked | PlayerHoldingR | ]
+down [ no Blocker | action PlayerL no PlayerHolding | StoneStatic ] -> [ StonePicked | PlayerHoldingL | ]
+down [ no Blocker | action Player no PlayerHolding | StoneStatic ] -> [ StonePicked | PlayerHoldingN | ]
+
+down [ no Blocker | action PlayerR no PlayerHolding | Gem1 ] -> [ Gem2 | PlayerHoldingR | ] again
+down [ no Blocker | action PlayerL no PlayerHolding | Gem1 ] -> [ Gem2 | PlayerHoldingL | ] again
+down [ no Blocker | action Player  no PlayerHolding | Gem1 ] -> [ Gem2 | PlayerHoldingN | ] again
+
+
+
+(move while holding)
+horizontal [ > PlayerHolding | Blocker ] -> [ PlayerHolding | Blocker ]
+up [ horizontal PlayerHolding | StonePicked ] -> [ horizontal PlayerHolding | horizontal StonePicked ]
+
+
+(throw)
+up [ action PlayerHoldingR | StonePicked ] -> [ PlayerFreeR | ThrownStoneR ] again
+up [ action PlayerHoldingL | StonePicked ] -> [ PlayerFreeL | ThrownStoneL ] again
+
+
+(delete actions)
+[ action Blocker ] -> [ Blocker ]
+
+(climb)
+( use flag action to signify stuff with empty spots above )
+up [ stationary Blocker no Player | no Blocker ] -> [ action Blocker | ]
+
+left [ > Player no PlayerHolding | action Blocker ] -> [ action Player | Blocker ]
+up [ action Player | no Blocker ] -> [ | left Player  ]
+
+right [ > Player no PlayerHolding | action Blocker ] -> [ action Player | Blocker ]
+up [ action Player | no Blocker ] -> [ | right Player  ]
+
+
+
+(Make it die after a tick)
+late down [ Player | Spike ] -> again
+
+(stone got lost)
+late up [ PlayerHoldingN | no Held ] -> [ PlayerFreeN | ]
+late up [ PlayerHoldingR | no Held ] -> [ PlayerFreeR | ]
+late up [ PlayerHoldingL | no Held ] -> [ PlayerFreeL | ]
+late down [ StonePicked | no PlayerHolding ] -> [ StoneStatic | ]
+
+late down [ MightFall | no Blocker ] -> again
+
+
+late [] -> [ NoRock]
+late [ Stone No Fell NoRock ] -> [ Stone ]
+late [ No NotFirst ] -> [ NotFirst ]
+
+==============
+WINCONDITIONS
+==============
+Some Player
+All Player on BottomRow
+
+=======
+LEVELS
+=======
+
+Message Controls are: Left or A, Right or D , X or space
+
+Message Go Deep
+
+level_select_point (01)
+
+#...P....#
+#........#
+#%%%%%%%%#
+#%%%%%%%%#
+#%%%%%%%%#
+####%%####
+
+level_select_point (02)
+
+#...P....#
+#........#
+#%%%%%%%%#
+#%%%oo%%%#
+#%%%%%%%%#
+####%%####
+
+level_select_point (03)
+
+#.P........#
+#..........#
+#..........#
+#......#%%%#
+#%%%%%.#%%%#
+#%%%%%%#%%%#
+#oo%%%%#%%%#
+#%%%%%%#%%%#
+########%%%#
+
+level_select_point (04)
+
+#..P...#
+#......#
+#......#
+#......#
+#......#
+#%oooo%#
+#%oooo%#
+#%oooo%#
+###%%###
+
+level_select_point (05)
+
+#.p.........#
+#...........#
+#...........#
+#...........#
+#.%%%%%%%...#
+#.%o%..%%..%#
+#.%%%...%..%#
+#.....#%%%#%#
+#.....#%%%#%#
+###########%#
+
+level_select_point (06)
+
+#.P....#...#
+#......#...#
+#......#..o#
+#........###
+#......%%..#
+#....##%..%#
+#o%%w##%WW.#
+##########.#
+
+level_select_point (07)
+
+#p................#
+#.................#
+#...............%.#
+#...............%.#
+#...o#.....%%o..%.#
+######.....%.%#.%.#
+######.%.o.%.%#.%.#
+#######w#######.%.#
+################%.#
+
+
+level_select_point (08)
+
+#p.......######
+#........######
+#........######
+#....$.o.##.###
+#....######.###
+#.$#........#.#
+#.%%%%...####.#
+#....###......#
+#.......%%%..$#
+#...##%#..#####
+#..%##$#..%####
+##########%####
+
+level_select_point (09)
+
+######.......P.#
+###............#
+##.o##$%%......#
+##.%.#%%%%$....#
+##.%.....%%%...#
+##.%......%%%%%#
+##.%..........%#
+##.%...........#
+##.%........%o%#
+#..%ww#.....%%%#
+#.##############
+
+level_select_point (10)
+#......P......######
+#......#......######
+#......o......######
+#.$....o....$.######
+####%%%%%%%#########
+#.............######
+#.............######
+#.............######
+#..................#
+#..................#
+#.$.........$....#.#
+#%%%%%%%%%%%%%#ww#.#
+#%%%%%%%%%%%%%####.#
+#%%%%%%%%%%%%%####.#
+#%%%%%%$%%%%%%####.#
+##################.#
+
+Message This is the end of the levels I've made for the jam.
+
+Message Thank you for playing!
