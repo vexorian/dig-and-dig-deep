@@ -1,4 +1,4 @@
-title Dig Deeper and Deeper 0.34
+title Dig and Dig Deep 1.43
 
 (This uses pancelor's puzzle script fork : https://pancelor.com/PuzzleScript/editor.html )
 ( After exporting, set SOUND_VOL variable to 0.05  in the generated HTML)
@@ -290,6 +290,13 @@ White Yellow
 .010.
 ..0..
 
+Gem3
+White Yellow
+..0..
+.010.
+01000
+.010.
+..0..
 
 
 StoneStatic
@@ -374,11 +381,21 @@ transparent
 NotFalling
 transparent
 
-Manhattan1
+ManhattanU
 blue
 
-Manhattan2
-orange
+ManhattanD
+blue
+
+ManhattanL
+blue
+
+ManhattanR
+blue
+
+ManhattanN
+blue
+
 
 FoundGem
 transparent
@@ -388,6 +405,131 @@ transparent
 
 NoRock
 transparent
+
+PathU
+white
+..0..
+..0..
+.....
+.....
+.....
+
+PathD
+white
+.....
+.....
+.....
+..0..
+..0..
+
+
+PathL
+white
+.....
+.....
+00...
+.....
+.....
+
+PathR
+white
+.....
+.....
+...00
+.....
+.....
+
+PathU2
+yellow
+..0..
+..0..
+.....
+.....
+.....
+
+PathD2
+yellow
+.....
+.....
+.....
+..0..
+..0..
+
+
+PathL2
+yellow
+.....
+.....
+00...
+.....
+.....
+
+PathR2
+yellow
+.....
+.....
+...00
+.....
+.....
+
+
+romani
+#5C3546
+.....
+0....
+0....
+0....
+.....
+
+romanii
+#5C3546
+.....
+0.0..
+0.0..
+0.0..
+.....
+
+romaniii
+#5C3546
+.....
+0.0.0
+0.0.0
+0.0.0
+.....
+
+romaniv
+#5C3546
+.....
+0.0.0
+0.0.0
+0..0.
+.....
+
+romanv
+#5C3546
+.....
+.0.0.
+.0.0.
+..0..
+.....
+
+romanix
+#5C3546
+.....
+0.0.0
+0..0.
+0.0.0
+.....
+
+romanx
+#5C3546
+.....
+.0.0.
+..0..
+.0.0.
+.....
+
+
 
 =======
 LEGEND
@@ -400,6 +542,18 @@ P = Background and PlayerFreeN
 % = Background and EarthUnSet
 o = Background and StoneStatic
 $ = Background and Gem1
+
+1 = romani   and background and wall
+2 = romanii  and background and wall
+3 = romaniii and background and wall
+4 = romaniv  and background and wall
+5 = romanv   and background and wall
+9 = romanix  and background and Wall
+x = romanx   and background and Wall
+
+
+
+
 
 EarthL = EarthL_ or EarthLR
 EarthR = Earth_R or EarthLR
@@ -434,6 +588,11 @@ Held = StonePicked or Gem2
 WallSprite = WallSprite1 or WallSprite2 or WallSprite3
 GoneEarth = GoneEarth1 or GoneEarth2
 
+ManhattanV = ManhattanU or ManhattanD
+ManhattanH = ManhattanR or ManhattanL
+Manhattan = ManhattanV or ManhattanH or ManhattanN
+PathSprite = PathU or PathD or PathL or PathR or PathU2 or PathD2 or PathL2 or PathR2 or Gem3
+
 =======
 SOUNDS
 =======
@@ -455,22 +614,40 @@ Background
 GoneEarth
 Player, Stone, Wall, Earth, Spike, Gem1, Gem2
 WallSprite
+romani, romanii, romaniii, romaniv, romanv, romanix, romanx
 WallL
 WallR
 WallU
 WallD
 
 Error
-Manhattan1, Manhattan2
+Manhattan
 FoundGem
 NotFirst
 NoRock
+
+Gem3
+PathU, PathU2
+PathD, PathD2
+PathL, PathL2
+PathR, PathR2
+
 
 ======
 RULES
 ======
 
 (decorative stuff)
+[ Gem3 ] -> []
+[ PathU2  ] -> []
+[ PathD2  ] -> []
+[ PathL2  ] -> []
+[ PathR2  ] -> []
+[ PathU  ] -> [ PathU2 ]
+[ PathD  ] -> [ PathD2 ]
+[ PathL  ] -> [ PathL2 ]
+[ PathR  ] -> [ PathR2 ]
+
 [ Wall no WallSprite ] -> [ Wall random WallSprite ]
 left  [ Wall | no Wall ] -> [ Wall WallL | ]
 right [ Wall | no Wall ] -> [ Wall WallR | ]
@@ -492,22 +669,48 @@ down [ Player | Spike ] -> [ | Spike ] sfx4
 
 (Teleportation)
 
-down [ Gem2 | Player ] -> [ Manhattan1 Gem2 | Player ]
+down [ Gem2 | Player ] -> [ Gem2 ManhattanN | Player ]
 
 startloop
-   [Gem2][ Manhattan1 | no Manhattan2 no Manhattan1 ] -> [Gem2][ Manhattan1 | Manhattan2 ]
-   [Gem2][ Manhattan1 Gem1 ] -> [][ Manhattan1 Gem1 FoundGem ]
-   [Gem2][ Manhattan2 | no Manhattan1 no Manhattan2 ] -> [Gem2][ Manhattan2 | Manhattan1 ]
-   [Gem2][ Manhattan2 Gem1 ] -> [][ Manhattan2 Gem1 FoundGem ]
+   up   [ stationary Manhattan | no Manhattan ] -> [ stationary Manhattan | action ManhattanU ]
+   down [ stationary Manhattan | no Manhattan ] -> [ stationary Manhattan | action ManhattanD ]
+   left [ stationary Manhattan | no Manhattan ] -> [ stationary Manhattan | action ManhattanL ]
+   right[ stationary Manhattan | no Manhattan ] -> [ stationary Manhattan | action ManhattanR ]
+   [ action Manhattan ] -> [ stationary Manhattan ]
+   
+   [ Gem2 ][ Manhattan Gem1 ] -> [Gem3][ Manhattan FoundGem Gem1 ]
+  
 endloop
+
+(decorate found path)
+[ FoundGem Manhattan ] -> [ FoundGem action Manhattan ]
+startloop
+  up   [ stationary Manhattan | action ManhattanU ] -> [ action Manhattan | action ManhattanU ]
+  down [ stationary Manhattan | action ManhattanD ] -> [ action Manhattan | action ManhattanD ]
+  left [ stationary Manhattan | action ManhattanL ] -> [ action Manhattan | action ManhattanL ]
+  right[ stationary Manhattan | action ManhattanR ] -> [ action Manhattan | action ManhattanR ]
+endloop
+
+down [ action Manhattan | action Manhattan ] -> [ action Manhattan PathD | action Manhattan PathU ]
+left [ action Manhattan | action Manhattan ] -> [ action Manhattan PathL | action Manhattan PathR ]
+
+[ action Manhattan ] -> [ stationary Manhattan ]
+
+
+[ action ManhattanU ] -> [ PathU stationary ManhattanU ]
+[ action ManhattanD ] -> [ PathD stationary ManhattanD ]
+[ action ManhattanL ] -> [ PathL stationary ManhattanL ]
+[ action ManhattanR ] -> [ PathR stationary ManhattanR ]
+( /decorate found path)
+
+[ PathSprite ] -> again
 
 (startloop
    [Manhattan1][ Wall ] -> [Manhattan1][ StoneStatic ]
    [Manhattan1][ StoneStatic ] -> [Manhattan1][ Wall ]
 endloop)
 
-[ Manhattan1 ] -> []
-[ Manhattan2 ] -> []
+[ Manhattan ] -> []
 [ Gem2 ] -> []
 [ Player ][ FoundGem Gem1 ] -> [ ][ Player ] sfx0
 
@@ -695,7 +898,7 @@ level_select_point (01)
 #%%%%%%%%#
 #%%%%%%%%#
 #%%%%%%%%#
-####%%####
+####%%###1
 
 level_select_point (02)
 
@@ -705,114 +908,94 @@ level_select_point (02)
 #%%%oo%%%#
 #%%%%%%%%#
 ####%%####
+##......#2
+##......##
+##%oooo%##
+##%oooo%##
+###%%%%###
+
 
 level_select_point (03)
 
-#.P........#
-#..........#
-#..........#
-#......#%%%#
-#%%%%%.#%%%#
-#%%%%%%#%%%#
-#oo%%%%#%%%#
-#%%%%%%#%%%#
-########%%%#
+#P..............#
+#...............#
+#...............#
+#...#%%%%%%%....#
+#%%.#.%o%..%%..%#
+#o%##.%%%...%..%#
+#%%##.....#%%%#%#
+#%%##.....#%%%#%#
+#######3#######%#
 
 level_select_point (04)
-
-#..P...#
-#......#
-#......#
-#......#
-#......#
-#%oooo%#
-#%oooo%#
-#%oooo%#
-###%%###
-
-level_select_point (05)
-
-#.p.........#
-#...........#
-#...........#
-#...........#
-#.%%%%%%%...#
-#.%o%..%%..%#
-#.%%%...%..%#
-#.....#%%%#%#
-#.....#%%%#%#
-###########%#
-
-level_select_point (06)
 
 #.P....#...#
 #......#...#
 #......#..o#
-#........###
+#........#4#
 #......%%..#
 #....##%..%#
 #o%%w##%WW.#
 ##########.#
 
+level_select_point (05)
+
+#P..............#
+#...............#
+#...............#
+#...............#
+#..o#.....%%o..$#
+#####.....%.%#.##
+#%%%#.%.o.%.%#.##
+#%$%##w#######.##
+#%%%######5######
+
+
+level_select_point (06)
+
+#P#...............#
+#.#....$..........#
+#.#....#####o.#####
+#.#.$#.....####.###
+#.#.%%%%...####.###
+#.#....###......###
+#.#....#..%%%%%$.##
+#.######.#....##.##
+#.........%....#..#
+#...%%%%.##.####..#
+#..%%..$w####51#ww#
+#######%###########
+
 level_select_point (07)
 
-#p................#
-#.................#
-#...............%.#
-#...............%.#
-#...o#.....%%o..%.#
-######.....%.%#.%.#
-######.%.o.%.%#.%.#
-#######w#######.%.#
-################%.#
-
+52###.......P.#
+##............#
+#.o##$%%......#
+#.%.#%%%%$....#
+#.%.....%%%...#
+#.%......%%%%%#
+#.%..........%#
+#.%...........#
+#.%........%o%#
+#.%ww#.....%%%#
+#.#############
 
 level_select_point (08)
-
-#p.......######
-#........######
-#........######
-#....$.o.##.###
-#....######.###
-#.$#........#.#
-#.%%%%...####.#
-#....###......#
-#.......%%%..$#
-#...##%#..#####
-#..%##$#..%####
-##########%####
-
-level_select_point (09)
-
-######.......P.#
-###............#
-##.o##$%%......#
-##.%.#%%%%$....#
-##.%.....%%%...#
-##.%......%%%%%#
-##.%..........%#
-##.%...........#
-##.%........%o%#
-#..%ww#.....%%%#
-#.##############
-
-level_select_point (10)
-#......P......######
-#......#......######
-#......o......######
-#.$....o....$.######
-####%%%%%%%#########
-#.............######
-#.............######
-#.............######
-#..................#
-#..................#
-#.$.........$....#.#
-#%%%%%%%%%%%%%#ww#.#
-#%%%%%%%%%%%%%####.#
-#%%%%%%%%%%%%%####.#
-#%%%%%%$%%%%%%####.#
-##################.#
+####.....P.....####
+####...........####
+####.....#.....####
+####$....o....$####
+######...o...######
+######%%%%%%%#53###
+######.......######
+#.................#
+#%...............%#
+#%..$.........$..%#
+#%.#%%%%%%%%%%%#.%#
+#%w#%%%%%%%%%%%#w%#
+#%##%%%%%%%%%%%##%#
+#%##%%%%%$%%%%%##%#
+#%###############%#
 
 Message This is the end of the levels I've made for the jam.
 
